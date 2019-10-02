@@ -126,10 +126,11 @@ int write_finish_signal ()
                 addi      t3           ,    t3        ,     0x4;             \
                 blt       t0           ,    s2        ,     __load_stack;    \
                                                                              \
-              __invoke_kernel:                                               \
-                jalr      s1");                                              \
+              __invoke_kernel:");                                            \
+           bsg_print_stat_start(__bsg_tile_group_id);                        \
+           asm("jalr      s1;                                                \
                                                                              \
-           asm("li        t0           ,    0x8;                             \
+                li        t0           ,    0x8;                             \
                 bge       t0           ,    s2        ,     __kernel_return; \
                 addi      t0           ,    s2        ,     -0x8;            \
                 slli      t0           ,    t0        ,     0x2;             \
@@ -139,6 +140,7 @@ int write_finish_signal ()
                 lw        t0           ,    cuda_kernel_not_loaded_val;      \
                 sw        t0           ,    0 ( s0   );                      \
            ");                                                               \
+           bsg_print_stat_end(__bsg_tile_group_id);                          \
            write_finish_signal();                                            \
            asm("j         __wait_until_valid_func");
 
