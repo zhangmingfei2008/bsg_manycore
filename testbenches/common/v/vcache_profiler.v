@@ -6,7 +6,9 @@
 
 module vcache_profiler
   import bsg_cache_pkg::*;
-  #(parameter data_width_p="inv")
+  #(parameter data_width_p="inv"
+    ,parameter addr_width_p="inv"
+  )
   (
     input clk_i
     , input reset_i
@@ -16,9 +18,12 @@ module vcache_profiler
     , input miss_v
     , input bsg_cache_pkt_decode_s decode_v_r
 
+    , input [addr_width_p-1:0] addr_v_r
+
     , input [31:0] global_ctr_i
     , input print_stat_v_i
     , input [data_width_p-1:0] print_stat_tag_i
+
   );
 
 
@@ -87,9 +92,14 @@ module vcache_profiler
 	if (~reset_i) begin
           fd2 = $fopen(tracefile_lp, "a");
           if (inc_ld)
-            $fwrite(fd2, "%0d,%s\n", $time, "ld");
-          else if (inc_st)
-            $fwrite(fd2, "%0d,%s\n", $time, "st");
+            $fwrite(fd2, "%s,%0d,%0d,%s\n", my_name, $time, addr_v_r, "ld");
+          if (inc_st)
+            $fwrite(fd2, "%s,%0d,%0d,%s\n", my_name, $time, addr_v_r, "st");
+          if (inc_ld_miss)
+            $fwrite(fd2, "%s,%0d,%0d,%s\n", my_name, $time, addr_v_r, "ld_miss");
+          if (inc_st_miss)
+            $fwrite(fd2, "%s,%0d,%0d,%s\n", my_name, $time, addr_v_r, "st_miss");
+
           $fclose(fd2);
         end
 
