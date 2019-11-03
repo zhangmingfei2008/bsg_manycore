@@ -63,9 +63,10 @@ module vcache_profiler
   // file logging
   //
   localparam logfile_lp = "vcache_stats.log";
+  localparam tracefile_lp = "vcache_operation_trace.log";
 
   string my_name;
-  integer fd;
+  integer fd, fd2;
 
   initial begin
 
@@ -76,8 +77,23 @@ module vcache_profiler
       $fclose(fd);
     end
 
+
+    fd2 = $fopen(tracefile_lp, "w");
+    $fwrite(fd2, "time,operation\n");
+    $fclose(fd2);
+
     forever begin
       @(negedge clk_i) begin
+	if (~reset_i) begin
+          fd2 = $fopen(tracefile_lp, "a");
+          if (inc_ld)
+            $fwrite(fd2, "%0d,%s\n", $time, "ld");
+          else if (inc_st)
+            $fwrite(fd2, "%0d,%s\n", $time, "st");
+          $fclose(fd2);
+        end
+
+
         if (~reset_i & print_stat_v_i) begin
 
           $display("[BSG_INFO][VCACHE_PROFILER] %s t=%0t printing stats.", my_name, $time);
