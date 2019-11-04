@@ -25,6 +25,7 @@ module vcache_profiler
     , input print_stat_v_i
     , input [data_width_p-1:0] print_stat_tag_i
 
+    , input trace_en_i // from top-level testbench
   );
 
 
@@ -83,14 +84,16 @@ module vcache_profiler
       $fclose(fd);
     end
 
+    if (trace_en_i) begin
+      fd2 = $fopen(tracefile_lp, "w");
+      $fwrite(fd2, "time,x,addr,data,operation\n");
+      $fclose(fd2);
+    end
 
-    fd2 = $fopen(tracefile_lp, "w");
-    $fwrite(fd2, "time,x,addr,data,operation\n");
-    $fclose(fd2);
 
     forever begin
       @(negedge clk_i) begin
-	if (~reset_i) begin
+	if (~reset_i & trace_en_i) begin
           fd2 = $fopen(tracefile_lp, "a");
           if (inc_ld)
             $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld");

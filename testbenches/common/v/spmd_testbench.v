@@ -264,11 +264,13 @@ module spmd_testbench;
   
     bind bsg_cache vcache_profiler #(
       .data_width_p(data_width_p)
+      ,.addr_width_p(addr_width_p)
     ) vcache_prof (
       .*
       ,.global_ctr_i($root.spmd_testbench.global_ctr)
       ,.print_stat_v_i($root.spmd_testbench.print_stat_v)
       ,.print_stat_tag_i($root.spmd_testbench.print_stat_tag)
+      ,.trace_en_i($root.spmd_testbench.trace_en)
     );
 
   end
