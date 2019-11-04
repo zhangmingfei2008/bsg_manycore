@@ -19,6 +19,7 @@ module vcache_profiler
     , input bsg_cache_pkt_decode_s decode_v_r
 
     , input [addr_width_p-1:0] addr_v_r
+    , input [data_width_p-1:0] data_v_r
 
     , input [31:0] global_ctr_i
     , input print_stat_v_i
@@ -84,7 +85,7 @@ module vcache_profiler
 
 
     fd2 = $fopen(tracefile_lp, "w");
-    $fwrite(fd2, "time,x,addr,operation\n");
+    $fwrite(fd2, "time,x,addr,data,operation\n");
     $fclose(fd2);
 
     forever begin
@@ -92,13 +93,13 @@ module vcache_profiler
 	if (~reset_i) begin
           fd2 = $fopen(tracefile_lp, "a");
           if (inc_ld)
-            $fwrite(fd2, "%0d,%s,%0d,%s\n", $time, my_name, addr_v_r, "ld");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld");
           if (inc_st)
-            $fwrite(fd2, "%0d,%s,%0d,%s\n", $time, my_name, addr_v_r, "st");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "st");
           if (inc_ld_miss)
-            $fwrite(fd2, "%0d,%s,%0d,%s\n", $time, my_name, addr_v_r, "ld_miss");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld_miss");
           if (inc_st_miss)
-            $fwrite(fd2, "%0d,%s,%0d,%s\n", $time, my_name, addr_v_r, "st_miss");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "st_miss");
 
           $fclose(fd2);
         end
