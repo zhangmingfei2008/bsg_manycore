@@ -84,11 +84,12 @@ module vcache_profiler
       $fclose(fd);
     end
 
-    if (trace_en_i) begin
+    // TODO: borna fix
+    //if (trace_en_i) begin
       fd2 = $fopen(tracefile_lp, "w");
       $fwrite(fd2, "time,x,addr,data,operation\n");
       $fclose(fd2);
-    end
+    //end
 
 
     forever begin
@@ -103,7 +104,6 @@ module vcache_profiler
             $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld_miss");
           if (inc_st_miss)
             $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "st_miss");
-
           $fclose(fd2);
         end
 
