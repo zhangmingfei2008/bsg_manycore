@@ -27,15 +27,22 @@ int main()
 	{
 		int val, val2;
 
+		// ld + st
+//		bsg_dram_store(0, 0xdead);
+//		bsg_dram_load(512, val);
+
 		// ld + ld
 //		bsg_dram_load(0, val);
 //		bsg_dram_load(4, val2);
 
 
 		// ld_miss + ld_miss to different addresses
-		bsg_dram_load(2048, val);
+//		bsg_dram_load(2048, val);
 //		bsg_dram_load(2052, val2);
-		bsg_dram_load(3072, val2);
+//		bsg_dram_load(3072, val2);
+
+
+	
 
 
 		// ld_miss + ld_miss to same block
@@ -49,9 +56,9 @@ int main()
 
 
 		// batch load
-//		for (int i = 0; i < 1024; i += 4) {
-//			bsg_dram_store(i, 0xdea0 + i);
-//		}
+		for (int i = 0; i < 1024; i += 4) {
+			bsg_dram_load(1024 + i, val);
+		}
 
 
 	}

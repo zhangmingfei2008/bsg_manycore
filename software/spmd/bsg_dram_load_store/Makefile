@@ -1,4 +1,4 @@
-bsg_tiles_X = 4
+bsg_tiles_X = 1
 bsg_tiles_Y = 4
 
 ROM_NAME = bsg_manycore_io_complex_rom
