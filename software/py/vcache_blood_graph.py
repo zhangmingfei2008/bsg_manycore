@@ -28,12 +28,9 @@ from PIL import Image, ImageDraw, ImageFont
 from itertools import chain
 
 
-#DEFAULT_START_TIME = 18000000000
-#DEFAULT_END_TIME   = 20000000000
-#DEFAULT_TIMESTAMP  = 8000
-DEFAULT_START_TIME = 24000
-DEFAULT_END_TIME   = 148000
-DEFAULT_TIMESTAMP  = 20
+DEFAULT_START_TIME = 18000000000
+DEFAULT_END_TIME   = 20000000000
+DEFAULT_TIMESTAMP  = 8000
 DEFAULT_MODE       = "detailed"
 DEFAULT_INPUT_FILE = "vcache_operation_trace.log"
 
@@ -55,7 +52,8 @@ class VcacheBloodGraph:
                            "st",
                            "miss_ld",
                            "miss_st",
-                           "miss_unk"}
+                           "miss_unk",
+                           "idle"}
 
     # Coloring scheme for different types of operations
     # For detailed mode 
@@ -64,6 +62,7 @@ class VcacheBloodGraph:
                                          "miss_unk"         : (0xff, 0xff, 0x00), ## yellow
                                          "ld"               : (0xff, 0xff, 0xff), ## white
                                          "st"               : (0xff, 0xff, 0xff), ## white
+                                         "idle"             : (0x40, 0x40, 0x40), ## gray
                                     }
 
     # Coloring scheme for different types of operations
@@ -73,6 +72,7 @@ class VcacheBloodGraph:
                                          "miss_unk"         : (0xff, 0xff, 0x00), ## yellow
                                          "ld"               : (0xff, 0xff, 0xff), ## white
                                          "st"               : (0xff, 0xff, 0xff), ## white
+                                         "idle"             : (0x40, 0x40, 0x40), ## gray
                                     }
 
 
