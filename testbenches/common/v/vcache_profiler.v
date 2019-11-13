@@ -129,7 +129,7 @@ module vcache_profiler
     // TODO: borna fix
     //if (trace_en_i) begin
       fd2 = $fopen(tracefile_lp, "w");
-      $fwrite(fd2, "time,x,addr,data,operation\n");
+      $fwrite(fd2, "timestamp,x,addr,data,operation\n");
       $fclose(fd2);
     //end
 
