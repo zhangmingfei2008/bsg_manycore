@@ -141,21 +141,25 @@ module vcache_profiler
 	if (~reset_i & trace_en_i) begin
           fd2 = $fopen(tracefile_lp, "a");
 
-          if(inc_ld) begin
-            $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "ld");
-          end
-          if (inc_st) begin
-            $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "st");
-          end
+          if(v_v_r) begin
+            if(inc_ld) begin
+              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "ld");
+            end
+            if (inc_st) begin
+              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "st");
+            end
 
-          if(miss) begin
-            if(miss_ld)
-              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_ld");
-            else if(miss_st)
-              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_st");
-            else
-              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_unk");
+            if(miss) begin
+              if(miss_ld)
+                $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_ld");
+              else if(miss_st)
+                $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_st");
+              else
+                $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_unk");
+            end
           end
+          else
+            $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "idle");
 
           $fclose(fd2);
         end
