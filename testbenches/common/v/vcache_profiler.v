@@ -20,9 +20,9 @@ module vcache_profiler
     // We directly look at incoming cache_pkt into the cache
     , input v_i
     , input ready_o
-//    , input [addr_width_p-1:0] addr_tl_r
-//    , input [data_width_p-1:0] data_tl_r
-//    , input bsg_cache_pkt_decode_s decode_tl_r
+    , input [addr_width_p-1:0] addr_tl_r
+    , input [data_width_p-1:0] data_tl_r
+    , input bsg_cache_pkt_decode_s decode_tl_r
     , input [bsg_cache_pkt_width_lp-1:0] cache_pkt_i
     , input bsg_cache_pkt_decode_s decode
 
@@ -30,6 +30,7 @@ module vcache_profiler
     // For responses going out of verify stage
     , input v_o
     , input yumi_i
+    , input v_v_r
     , input miss_v
     , input [addr_width_p-1:0] addr_v_r
     , input [data_width_p-1:0] data_v_r
@@ -55,9 +56,10 @@ module vcache_profiler
 
   // event signals
   //
-  logic inc_req;
-  logic inc_req_ld;
-  logic inc_req_st;
+
+  logic miss;
+  logic miss_ld;
+  logic miss_st;
 
   logic inc_ld;
   logic inc_st;
@@ -65,10 +67,16 @@ module vcache_profiler
   logic inc_st_miss;
 
 
-  assign inc_req = ready_o & v_i;
-  assign inc_req_ld = ready_o & v_i & decode.ld_op;
-  assign inc_req_st = ready_o & v_i & decode.st_op;
+  // miss handler signals
+  // when miss is high, miss handler is active and output is not ready
+  // other signals (miss_ld/st) refer to the type of request
+  assign miss = v_v_r & miss_v & ~(v_o | yumi_i); 
+  assign miss_ld = v_v_r & miss_v & ~(v_o | yumi_i) & decode_v_r.ld_op;
+  assign miss_st = v_v_r & miss_v & ~(v_o | yumi_i) & decode_v_r.st_op;
 
+  // Load/store output is ready 
+  // when inc_ld/st is high it means a hit load/store is ready
+  // when inc_ld/st_miss is high it means a missed load/store is ready
   assign inc_ld = v_o & yumi_i & decode_v_r.ld_op;
   assign inc_st = v_o & yumi_i & decode_v_r.st_op;
   assign inc_ld_miss = v_o & yumi_i & decode_v_r.ld_op & miss_v;
@@ -76,11 +84,6 @@ module vcache_profiler
 
 
   // stats counting
-  //
-  integer req_count_r;
-  integer req_ld_count_r;
-  integer req_st_count_r;
-
   // outgoing response
   integer ld_count_r;
   integer st_count_r;
@@ -91,20 +94,12 @@ module vcache_profiler
   always_ff @ (negedge clk_i) begin
 
     if (reset_i) begin
-      req_count_r <= '0;
-      req_ld_count_r <= '0;
-      req_st_count_r <= '0;
-
       ld_count_r <= '0;
       st_count_r <= '0;
       ld_miss_count_r <= '0;
       st_miss_count_r <= '0;
     end
     else begin
-      if (inc_req) req_count_r <= req_count_r + 1;
-      if (inc_req_ld) req_ld_count_r <= req_ld_count_r +1;
-      if (inc_req_st) req_st_count_r <= req_st_count_r +1;
-
       if (inc_ld) ld_count_r <= ld_count_r + 1;
       if (inc_st) st_count_r <= st_count_r + 1;
       if (inc_ld_miss) ld_miss_count_r <= ld_miss_count_r + 1;
@@ -144,34 +139,20 @@ module vcache_profiler
 	if (~reset_i & trace_en_i) begin
           fd2 = $fopen(tracefile_lp, "a");
 
-
-          if (miss_v)
-                $fwrite(fd2, "%0d,%s,%s\n", $time, my_name, "miss");
-
-
-          if (inc_req) begin
-              if (inc_req_ld)
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, cache_pkt.addr, cache_pkt.data, "req_ld");
-              else if (inc_req_st)
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, cache_pkt.addr, cache_pkt.data, "req_st");
-              else
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, cache_pkt.data, cache_pkt.data, "req_unk");
-          end
-
-
-
           if(inc_ld) begin
-            if(inc_ld_miss) 
-              $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld_miss");
-            else
-               $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "ld");
+               $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, addr_v_r, data_v_r, "ld");
+          end
+          if (inc_st) begin
+              $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, addr_v_r, data_v_r, "st");
           end
 
-          if (inc_st) begin
-            if (inc_st_miss)
-              $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "st_miss");
-            else 
-              $fwrite(fd2, "%0d,%s,%0d,%0d,%s\n", $time, my_name, addr_v_r, data_v_r, "st");
+          if(miss) begin
+            if(miss_ld)
+                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, addr_v_r, data_v_r, "miss_ld");
+            else if(miss_st)
+                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, addr_v_r, data_v_r, "miss_st");
+            else
+                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name, addr_v_r, data_v_r, "miss_unk");
           end
 
           $fclose(fd2);
