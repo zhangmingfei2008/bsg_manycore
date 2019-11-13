@@ -129,12 +129,12 @@ module vcache_profiler
     // TODO: borna fix
     //if (trace_en_i) begin
       fd2 = $fopen(tracefile_lp, "w");
-      $fwrite(fd2, "timestamp,x,addr,data,operation\n");
+      $fwrite(fd2, "timestamp,x,y,addr,data,operation\n");
       $fclose(fd2);
     //end
 
 
-    // TODO: borna fix the my_name[34] issue
+    // TODO: borna fix the my_name[34] issue (x,y) coordinates
 
     forever begin
       @(negedge clk_i) begin
@@ -142,19 +142,19 @@ module vcache_profiler
           fd2 = $fopen(tracefile_lp, "a");
 
           if(inc_ld) begin
-               $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name[34], addr_v_r, data_v_r, "ld");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "ld");
           end
           if (inc_st) begin
-              $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name[34], addr_v_r, data_v_r, "st");
+            $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "st");
           end
 
           if(miss) begin
             if(miss_ld)
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name[34], addr_v_r, data_v_r, "miss_ld");
+              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_ld");
             else if(miss_st)
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name[34], addr_v_r, data_v_r, "miss_st");
+              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_st");
             else
-                $fwrite(fd2, "%0d,%s,%0d,0x%0h,%s\n", $time, my_name[34], addr_v_r, data_v_r, "miss_unk");
+              $fwrite(fd2, "%0d,%s,%0d,%0d,0x%0h,%s\n", $time, my_name[34], 0, addr_v_r, data_v_r, "miss_unk");
           end
 
           $fclose(fd2);
