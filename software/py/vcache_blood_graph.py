@@ -61,7 +61,7 @@ class VcacheBloodGraph:
                                          "miss_st"          : (0x00, 0x00, 0xff), ## blue
                                          "miss_unk"         : (0xff, 0xff, 0x00), ## yellow
                                          "ld"               : (0xff, 0xff, 0xff), ## white
-                                         "st"               : (0xff, 0xff, 0xff), ## white
+                                         "st"               : (0x00, 0xff, 0x00), ## green
                                          "idle"             : (0x40, 0x40, 0x40), ## gray
                                     }
 
@@ -71,7 +71,7 @@ class VcacheBloodGraph:
                                          "miss_st"          : (0x00, 0x00, 0xff), ## blue
                                          "miss_unk"         : (0xff, 0xff, 0x00), ## yellow
                                          "ld"               : (0xff, 0xff, 0xff), ## white
-                                         "st"               : (0xff, 0xff, 0xff), ## white
+                                         "st"               : (0x00, 0xff, 0x00), ## green
                                          "idle"             : (0x40, 0x40, 0x40), ## gray
                                     }
 
