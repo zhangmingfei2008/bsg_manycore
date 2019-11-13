@@ -60,6 +60,11 @@ int main()
 			bsg_dram_load(1024 + i, val);
 		}
 
+		// batch store
+		for (int i = 0; i < 1024; i += 4) {
+			bsg_dram_store(1024 + i, 0xdea0 + i);
+		}
+
 
 	}
 	
