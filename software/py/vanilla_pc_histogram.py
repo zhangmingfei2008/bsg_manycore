@@ -85,8 +85,11 @@ class PCHistogram:
         for trace in traces:
             relative_x = trace["x"] - self._BSG_ORIGIN_X
             relative_y = trace["y"] - self._BSG_ORIGIN_Y
+            operation = trace["operations"]
 
-            tile_pc_cnt[relative_y][relative_x][trace["pc"]] += 1
+            # Only add to pc count if at this cycle the processor is not stalled
+            if(not item.startswith('stall_')):
+                tile_pc_cnt[relative_y][relative_x][trace["pc"]] += 1
         return tile_pc_cnt
 
 
