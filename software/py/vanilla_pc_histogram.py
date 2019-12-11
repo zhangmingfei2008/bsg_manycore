@@ -35,6 +35,10 @@ class PCHistogram:
     _BSG_ORIGIN_X = 0
     _BSG_ORIGIN_Y = 1
 
+    _BSG_PC_MIN = 0x0000
+    _BSG_PC_MAX = 0x2000
+
+    _BSG_PC_ADDR_STEP = 0x4
 
     # default constructor
     def __init__(self, manycore_dim_y, manycore_dim_x, per_tile_stat, input_file):
@@ -47,8 +51,9 @@ class PCHistogram:
         self.traces = []
         self.manycore_pc_cnt = Counter()
         self.tile_pc_cnt = Counter()
-        self.max_pc_val = 0
-        self.min_pc_val = 0
+        self.min_pc_val = self._BSG_PC_MIN
+        self.max_pc_val = self._BSG_PC_MAX
+
 
        # parse vanilla_operation_trace.log
         with open(input_file) as f:
@@ -62,14 +67,14 @@ class PCHistogram:
                 trace["pc"] = int(row["pc"], 16)
 
                 # update min and max pc read from traces 
-                self.max_pc_val = max(self.max_pc_val, trace["pc"])
-                self.min_pc_val = min(self.min_pc_val, trace["pc"])
+                #self.max_pc_val = max(self.max_pc_val, trace["pc"])
+                #self.min_pc_val = min(self.min_pc_val, trace["pc"])
 
-                self.traces.append(trace)
+                if (trace["pc"] >= self._BSG_PC_MIN and trace["pc"] <= self._BSG_PC_MAX):
+                    self.traces.append(trace)
 
         self.tile_pc_cnt = self.__generate_tile_pc_cnt(self.traces)
         self.manycore_pc_cnt = self.__generate_manycore_pc_cnt(self.tile_pc_cnt)
-
 
         self.__print_manycore_stats_all(self.manycore_pc_cnt)
         if(self.per_tile_stat):
@@ -111,19 +116,21 @@ class PCHistogram:
         pc_end   = self.min_pc_val
 
         while (pc_start <= self.max_pc_val and pc_end <= self.max_pc_val):
-            if (tile_pc_cnt[y][x][pc_start] == tile_pc_cnt[y][x][pc_end]):
-                 pc_end += 1
+            if(tile_pc_cnt[y][x][pc_start] == 0):
+                pc_start += self._BSG_PC_ADDR_STEP
+                pc_end += self._BSG_PC_ADDR_STEP
+            elif (tile_pc_cnt[y][x][pc_start] == tile_pc_cnt[y][x][pc_end]):
+                 pc_end += self._BSG_PC_ADDR_STEP
             else:
-                 if (tile_pc_cnt[y][x][pc_start] > 0):
-                     stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start << 2),
-                                                                          ((pc_end-1) << 2),
-                                                                          tile_pc_cnt[y][x][pc_start]))
+                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start),
+                                                                      ((pc_end - self._BSG_PC_ADDR_STEP)),
+                                                                      tile_pc_cnt[y][x][pc_start]))
                  pc_start = pc_end
 
-        if(pc_start < self.max_pc_val-1):
+        if(pc_start < self.max_pc_val - self._BSG_PC_ADDR_STEP):
             if (tile_pc_cnt[y][x][pc_start] > 0):
-                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start << 2),
-                                                                      ((pc_end-1) << 2),
+                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start),
+                                                                      ((pc_end - self._BSG_PC_ADDR_STEP)),
                                                                       tile_pc_cnt[y][x][pc_start]))
 
         return
@@ -153,19 +160,21 @@ class PCHistogram:
         pc_end   = self.min_pc_val
 
         while (pc_start <= self.max_pc_val and pc_end <= self.max_pc_val):
-            if (manycore_pc_cnt[pc_start] == manycore_pc_cnt[pc_end]):
-                 pc_end += 1
+            if (manycore_pc_cnt[pc_start] == 0):
+                pc_start += self._BSG_PC_ADDR_STEP
+                pc_end += self._BSG_PC_ADDR_STEP
+            elif (manycore_pc_cnt[pc_start] == manycore_pc_cnt[pc_end]):
+                 pc_end += self._BSG_PC_ADDR_STEP
             else:
-                 if (manycore_pc_cnt[pc_start] > 0):
-                     stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start << 2),
-                                                                          ((pc_end-1) << 2),
-                                                                          manycore_pc_cnt[pc_start]))
+                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start),
+                                                                      ((pc_end - self._BSG_PC_ADDR_STEP)),
+                                                                      manycore_pc_cnt[pc_start]))
                  pc_start = pc_end
 
-        if(pc_start < self.max_pc_val-1):
+        if(pc_start < self.max_pc_val - self._BSG_PC_ADDR_STEP):
             if (manycore_pc_cnt[pc_start] > 0):
-                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start << 2),
-                                                                      ((pc_end-1) << 2),
+                 stat_file.write("[{:>08x} - {:>08x}]: {:>16}\n".format((pc_start),
+                                                                      ((pc_end - self._BSG_PC_ADDR_STEP)),
                                                                       manycore_pc_cnt[pc_start]))
 
         return
