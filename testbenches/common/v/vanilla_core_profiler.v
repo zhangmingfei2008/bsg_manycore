@@ -92,7 +92,7 @@ module vanilla_core_profiler
 
   // task to print a line of operation trace
   task print_operation_trace(integer fd, string op);
-    $fwrite(fd, "%0t,%0d,%0d,%0h,%s", global_ctr_i, my_x_i, my_y_i, pc_r, op);
+    $fwrite(fd, "%0t,%0d,%0d,%0h,%s", global_ctr_i, my_x_i, my_y_i, (exe_r.pc_plus4 - 'd4), op);
   endtask
 
   // event signals
