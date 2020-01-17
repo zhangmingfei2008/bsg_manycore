@@ -1048,7 +1048,7 @@ class VanillaStatsParser:
       
             header = rdr.fieldnames
             for item in header:
-p                if (item.startswith('instr_')):
+                if (item.startswith('instr_')):
                     if (not item == 'instr_total'):
                         instrs += [item]
                 elif (item.startswith('miss_')):
